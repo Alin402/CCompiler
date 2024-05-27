@@ -213,7 +213,7 @@ inline int type_name(Type *type)
 	{
 		if (!array_decl(type))
 		{
-			type->noElements = 0;
+			type->noElements = -1;
 		}
 		return 1;
 	}
@@ -309,7 +309,6 @@ inline int decl_func(void)
 			tkerr(current_token, "Missing <<identifier>> after <<function void>> declaration.");
 		return 1;
 	}
-
 	return 0;
 }
 

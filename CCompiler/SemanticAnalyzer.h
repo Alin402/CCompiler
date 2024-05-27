@@ -119,7 +119,8 @@ inline void add_var(Token *token_name, Type *t)
             tkerr(current_token, "symbol redefinition: %s", token_name->text);
         }
         s = add_symbol(symbols, token_name->text, CLS_VAR);
-        s -> mem=MEM_LOCAL;
+        s -> mem = MEM_LOCAL;
+        add_symbol(&current_func->members,token_name->text,CLS_VAR);
     }
     else{
         if(find_symbol(symbols, token_name->text))
@@ -170,6 +171,15 @@ inline void iterate_through_symbols(Symbols *symbols)
         for (Symbol **s = symbols->begin; s < symbols->end; s++)
         {
             printf("Symbol: %s, cls: %d, depth: %d, type: %d\n", (*s)->name, (*s)->cls, (*s)->depth, (*s)->type.typeBase);
+            if ((*s)->members.begin)
+            {
+                printf("Members:\n");
+                for (Symbol **m = (*s)->members.begin; m < (*s)->members.end; m++)
+                {
+                    printf("Symbol: %s, cls: %d, depth: %d\n", (*m)->name, (*m)->cls, (*m)->depth);
+                }
+                printf("End Members\n\n");
+            }
         }
     }    
 }
@@ -182,6 +192,13 @@ inline void initialize_semantic_analyzer(void)
         err("Not enough memory...");
     }
     init_symbols(symbols);
+
+    // Add external functions
+    add_symbol(symbols, "put_i", CLS_EXTFUNC);
+    add_symbol(symbols, "put_s", CLS_EXTFUNC);
+    add_symbol(symbols, "get_i", CLS_EXTFUNC);
+    add_symbol(symbols, "get_c", CLS_EXTFUNC);
+    add_symbol(symbols, "put_d", CLS_EXTFUNC);
 }
 
 inline void free_symbols_table(void)
