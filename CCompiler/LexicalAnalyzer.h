@@ -354,28 +354,39 @@ inline int parse_input_file(char* file_name)
 				buffer = NULL;
 				buffer = allocate_one_character_in_buffer(buffer, &buffer_size, '-');
 				c = fgetc(fp);
-				}
+			}
 			else if (c == '*')
 			{
 				state = 34;
 				buffer = NULL;
 				buffer = allocate_one_character_in_buffer(buffer, &buffer_size, '*');
 				c = fgetc(fp);
-				}
+			}
 			else if (c == '/')
 			{
-				state = 35;
-				buffer = NULL;
-				buffer = allocate_one_character_in_buffer(buffer, &buffer_size, '/');
-				c = fgetc(fp);
+				char next_c = fgetc(fp);
+				ungetc(next_c, fp);
+
+				if (next_c == '/' || next_c == '*')
+				{
+					state = 54;
+					c = fgetc(fp);
 				}
+				else
+				{
+					state = 35;
+					buffer = NULL;
+					buffer = allocate_one_character_in_buffer(buffer, &buffer_size, '/');
+					c = fgetc(fp);
+				}
+			}
 			else if (c == '.')
 			{
 				state = 36;
 				buffer = NULL;
 				buffer = allocate_one_character_in_buffer(buffer, &buffer_size, '.');
 				c = fgetc(fp);
-				}
+			}
 			else if (c == '&')
 			{
 				state = 37;
@@ -417,10 +428,10 @@ inline int parse_input_file(char* file_name)
 				buffer = NULL;
 				buffer = allocate_one_character_in_buffer(buffer, &buffer_size, '>');
 				c = fgetc(fp);
-				}
+			}
 			else
 			{
-				printf("File not valid in state 0");
+				printf("File not valid in state 0\n");
 				return 0;
 			}
 			break;
@@ -437,7 +448,7 @@ inline int parse_input_file(char* file_name)
 				}
 				else
 				{
-					printf("File not valid in state 0");
+					printf("File not valid in state 1");
 					return 0;
 				}
 			}
@@ -520,7 +531,7 @@ inline int parse_input_file(char* file_name)
 				}
 				else
 				{
-					printf("File not valid in state 0");
+					printf("File not valid in state 3");
 					return 0;
 				}
 			}
@@ -560,7 +571,7 @@ inline int parse_input_file(char* file_name)
 				}
 				else
 				{
-					printf("File not valid in state 0");
+					printf("File not valid in state 5");
 					return 0;
 				}
 			}
@@ -578,7 +589,7 @@ inline int parse_input_file(char* file_name)
 				}
 				else
 				{
-					printf("File not valid in state 0");
+					printf("File not valid in state 6");
 					return 0;
 				}
 			}
@@ -591,7 +602,7 @@ inline int parse_input_file(char* file_name)
 			}
 			else
 			{
-				printf("File not valid in state 0");
+				printf("File not valid in state 7");
 				return 0;
 			}
 			break;
@@ -608,7 +619,7 @@ inline int parse_input_file(char* file_name)
 				}
 				else
 				{
-					printf("File not valid in state 0");
+					printf("File not valid in state 8");
 					return 0;
 				}
 			}
@@ -621,7 +632,7 @@ inline int parse_input_file(char* file_name)
 			}
 			else
 			{
-				printf("File not valid in state 0");
+				printf("File not valid in state 9");
 				return 0;
 			}
 			break;
@@ -643,7 +654,7 @@ inline int parse_input_file(char* file_name)
 				}
 				else
 				{
-					printf("File not valid in state 0");
+					printf("File not valid in state 62");
 					return 0;
 				}
 			}
@@ -684,7 +695,7 @@ inline int parse_input_file(char* file_name)
 				}
 				else
 				{
-					printf("File not valid in state 0");
+					printf("File not valid in state 12");
 					return 0;
 				}
 			}
@@ -732,7 +743,7 @@ inline int parse_input_file(char* file_name)
 			}
 			else
 			{
-				printf("File not valid in state 16");
+				printf("File not valid in state 17");
 				return 0;
 			}
 			break;
@@ -874,7 +885,7 @@ inline int parse_input_file(char* file_name)
 			}
 			else
 			{
-				printf("File not valid in state 21");
+				printf("File not valid in state 37");
 				return 0;
 			}
 			break;
@@ -892,7 +903,7 @@ inline int parse_input_file(char* file_name)
 			}
 			else
 			{
-				printf("File not valid in state 21");
+				printf("File not valid in state 39");
 				return 0;
 			}
 			break;
@@ -992,6 +1003,94 @@ inline int parse_input_file(char* file_name)
 			add_new_token(GREATER, buffer, line);
 			buffer = NULL;
 			buffer_size = 0;
+			state = 0;
+			break;
+		case 54:
+			if (c == '/')
+			{
+				state = 55;
+				c = fgetc(fp);
+			}
+			else if (c == '*')
+			{
+				state = 57;
+				c = fgetc(fp);
+			}
+			else
+			{
+				printf("File not valid in state 54");
+				return 0;
+			}
+			break;
+		case 55:
+			if (c != '\n' && c != EOF)
+			{
+				c = fgetc(fp);
+			}
+			else
+			{
+				state = 0;
+			}
+			break;
+		case 56:
+			state = 0;
+			break;
+		case 57:
+			if (c == '*')
+			{
+				state = 58;
+			}
+			else if (c != EOF)
+			{
+				state = 57;
+			}
+			c = fgetc(fp);
+			break;
+
+		case 58:
+			if (c == '*')
+			{
+				state = 58;
+			}
+			else if (c == '/')
+			{
+				state = 0;
+			}
+			else
+			{
+				state = 57;
+			}
+			c = fgetc(fp);
+			break;
+		case 59:
+			if (c == '*')
+			{
+				state = 60;
+				c = fgetc(fp);
+			}
+			else
+			{
+				state = 57;
+				c = fgetc(fp);
+			}
+			break;
+		case 60:
+			if (c == '*')
+			{
+				c = fgetc(fp);
+			}
+			else if (c == '/')
+			{
+				state = 61;
+				c = fgetc(fp);
+			}
+			else
+			{
+				printf("File not valid in state 60");
+				return 0;
+			}
+			break;
+		case 61:
 			state = 0;
 			break;
 		default:

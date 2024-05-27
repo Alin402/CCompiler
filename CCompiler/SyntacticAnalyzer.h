@@ -39,8 +39,10 @@ int expr_primary(void);
 void addStruct(Token *tkName);
 void clearStruct();
 
-inline int consume(const int code) {
-	if (current_token->code == code) {
+inline int consume(const int code)
+{
+	if (current_token->code == code)
+	{
 		consumed_token = current_token;
 		current_token = current_token->next;
 		return 1;
@@ -48,8 +50,10 @@ inline int consume(const int code) {
 	return 0;
 }
 
-inline int unit(void) {
-	while (1) {
+inline int unit(void)
+{
+	while (1)
+	{
 		if (decl_struct()) {}
 		else if (decl_func()) {}
 		else if (decl_var()) {}
@@ -59,7 +63,8 @@ inline int unit(void) {
 	return 1;
 }
 
-inline int decl_struct(void) {
+inline int decl_struct(void)
+{
 	Token *start_token = current_token;
 	if (!consume(STRUCT)) return 0;
 	if (!consume(ID)) tkerr(current_token, "Missing <<identifier>> after <<struct>> declaration.");
@@ -79,7 +84,8 @@ inline int decl_struct(void) {
 	current_struct=add_symbol(symbols, token_name->text, CLS_STRUCT);
 	init_symbols(&current_struct->members);
 	// EST
-	while (1) {
+	while (1)
+	{
 		if (!decl_var()) {}
 		else break;
 	}
@@ -115,7 +121,8 @@ inline int decl_var(void)
 	// ST
 	add_var(token_name, type);
 	// EST
-	while (1) {
+	while (1)
+	{
 		if (!consume(COMMA)) break;
 		if (!consume(ID)) tkerr(current_token, "Missing <<identifier>> after <<,>> in VAR declaration.");
 		// ST
@@ -140,7 +147,8 @@ inline int decl_var(void)
 	return 0;
 }
 
-inline int type_base(Type *type) {
+inline int type_base(Type *type)
+{
 	Token *start_token = current_token;
 	if (consume(INT))
 	{
@@ -163,7 +171,8 @@ inline int type_base(Type *type) {
 		// EST
 		return 1;
 	}
-	if (consume(STRUCT)) {
+	if (consume(STRUCT))
+	{
 		// ST
 		Token *token_name = NULL;
 		// EST
@@ -185,7 +194,8 @@ inline int type_base(Type *type) {
 	return 0;
 }
 
-inline int array_decl(Type *type) {
+inline int array_decl(Type *type)
+{
 	if (!consume(LBRACKET)) return 0;
 	if (expr())
 	{
@@ -199,7 +209,8 @@ inline int array_decl(Type *type) {
 
 inline int type_name(Type *type)
 {
-	if (type_base(type)) {
+	if (type_base(type))
+	{
 		if (!array_decl(type))
 		{
 			type->noElements = 0;
@@ -209,11 +220,13 @@ inline int type_name(Type *type)
 	return 0;
 }
 
-inline int decl_func_1(Type *type) {
+inline int decl_func_1(Type *type)
+{
 	Token *start_token = current_token;
 	if (!consume(ID)) return 0;
 	Token *token_name = consumed_token;
-		if (consume(LPAR)) {
+		if (consume(LPAR))
+		{
 			// ST
 			if(find_symbol(symbols, token_name->text))
 			{
@@ -224,10 +237,14 @@ inline int decl_func_1(Type *type) {
 			current_func->type = *type;
 			current_depth++;
 			// EST
-			if (func_arg()) {
-				while (1) {
-					if (consume(COMMA)) {
-						if (func_arg()) {
+			if (func_arg())
+			{
+				while (1)
+				{
+					if (consume(COMMA))
+					{
+						if (func_arg())
+						{
 							continue;
 						}
 						else tkerr(current_token, "Missing <<argument list>> in <<function>> declaration.");
@@ -235,11 +252,13 @@ inline int decl_func_1(Type *type) {
 					else break;
 				}
 			}
-			if (consume(RPAR)) {
+			if (consume(RPAR))
+			{
 				// ST
 				current_depth--;
 				// EST
-				if (stm_compound()) {
+				if (stm_compound())
+				{
 					// ST
 					delete_symbols_after(symbols, current_func);
 					current_func = NULL;
@@ -254,12 +273,14 @@ inline int decl_func_1(Type *type) {
 	return 0;
 }
 
-inline int decl_func(void) {
+inline int decl_func(void)
+{
 	Token *start_token = current_token;
 	// ST
 	Type *type = (Type*)malloc(sizeof(Type));
 	// EST
-	if (type_base(type)) {
+	if (type_base(type))
+	{
 		if (consume(MUL))
 		{
 			// ST
@@ -272,13 +293,15 @@ inline int decl_func(void) {
 			type->noElements = -1;
 			// EST
 		}
-		if (!decl_func_1(type)) {
+		if (!decl_func_1(type))
+		{
 			current_token = start_token;
 			return 0;
 		}
 		return 1;
 	}
-	if (consume(VOID)) {
+	if (consume(VOID))
+	{
 		// ST
 		type->typeBase = TB_VOID;
 		// EST
@@ -296,8 +319,10 @@ inline int func_arg(void) {
 	Type *type = (Type*)malloc(sizeof(Type));
 	Token *token_name = NULL;
 	// EST
-	if (type_base(type)) {
-		if (consume(ID)) {
+	if (type_base(type))
+	{
+		if (consume(ID))
+		{
 			token_name = consumed_token;
 			if (!array_decl(type))
 			{
@@ -321,15 +346,22 @@ inline int func_arg(void) {
 	return 0;
 }
 
-inline int stm(void) {
+inline int stm(void)
+{
 	Token *start_token = current_token;
 	if (stm_compound()) return 1;
-	if (consume(IF)) {
-		if (consume(LPAR)) {
-			if (expr()) {
-				if (consume(RPAR)) {
-					if (stm()) {
-						if (consume(ELSE)) {
+	if (consume(IF))
+	{
+		if (consume(LPAR))
+		{
+			if (expr())
+			{
+				if (consume(RPAR))
+				{
+					if (stm())
+					{
+						if (consume(ELSE))
+						{
 							if (stm()) return 1;
 							else tkerr(current_token, "Missing <<stm>> after <<else>>.");
 						}
@@ -344,11 +376,16 @@ inline int stm(void) {
 		else tkerr(current_token, "Missing <<(>> in <<if>>.");
 	}
 	current_token = start_token;
-	if (consume(WHILE)) {
-		if (consume(LPAR)) {
-			if (expr()) {
-				if (consume(RPAR)) {
-					if (stm()) {
+	if (consume(WHILE))
+	{
+		if (consume(LPAR))
+		{
+			if (expr())
+			{
+				if (consume(RPAR))
+				{
+					if (stm())
+					{
 						return 1;
 					}
 					else tkerr(current_token, "Missing <<stm>> in <<while>>.");
@@ -360,7 +397,8 @@ inline int stm(void) {
 		else tkerr(current_token, "Missing <<(>> in <<while>>.");
 	}
 	current_token = start_token;
-	if (consume(FOR)) {
+	if (consume(FOR))
+	{
 		if (!consume(LPAR)) tkerr(current_token, "Missing <<(>> in for.");
 		expr();
 		if (!consume(SEMICOLON)) tkerr(current_token, "Missing <<;>> in for.");
@@ -372,25 +410,31 @@ inline int stm(void) {
 		return 1;
 	}
 	current_token = start_token;
-	if (consume(BREAK)) {
+	if (consume(BREAK))
+	{
 		if (consume(SEMICOLON))
 			return 1;
 		else tkerr(current_token, "Missing <<;>> for <<break>> statement.");
 	}
 	current_token = start_token;
-	if (consume(RETURN)) {
+	if (consume(RETURN))
+	{
 		expr();
-		if (consume(SEMICOLON)) {
+		if (consume(SEMICOLON))
+		{
 			return 1;
 		}
 		else tkerr(current_token, "Missing <<;>> for return statement.");
 	}
 	current_token = start_token;
-	if (consume(SEMICOLON)) {
+	if (consume(SEMICOLON))
+	{
 		return 1;
 	}
-	else {
-		if (expr()) {
+	else
+	{
+		if (expr())
+		{
 			if (!consume(SEMICOLON)) tkerr(current_token, "Missing <<;>> after expression.");
 			return 1;
 		}
@@ -399,16 +443,19 @@ inline int stm(void) {
 	return 0;
 }
 
-inline int stm_compound(void) {
+inline int stm_compound(void)
+{
 	Token *start_token = current_token;
 	// ST
 	Symbol *start = symbols->end[-1];
 	// EST
-	if (consume(LACC)) {
+	if (consume(LACC))
+	{
 		// ST
 		current_depth++;
 		// EST
-		while (1) {
+		while (1)
+		{
 			if (decl_var()) continue;
 			if (stm()) continue;
 			else break;
@@ -425,24 +472,31 @@ inline int stm_compound(void) {
 	return 0;
 }
 
-inline int expr(void) {
+inline int expr(void)
+{
 	if (expr_assign())
 		return 1;
 	return 0;
 }
 
-inline int expr_assign(void) {
+inline int expr_assign(void)
+{
 	Token *start_token = current_token;
-	if (consume(NOT) || consume(SUB)) {
-		if (expr_unary()) {
-			if (consume(ASSIGN)) {
+	if (consume(NOT) || consume(SUB))
+	{
+		if (expr_unary())
+		{
+			if (consume(ASSIGN))
+			{
 				if (expr_assign()) return 1;
 				else tkerr(current_token, "Missing <<assign expression>> declaration.");
 			}
 		}
 	}
-	if (expr_postfix()) {
-		if (consume(ASSIGN)) {
+	if (expr_postfix())
+	{
+		if (consume(ASSIGN))
+		{
 			if (expr_assign()) return 1;
 			else tkerr(current_token,"Missing <<assign expression>>.");
 		}
@@ -453,10 +507,13 @@ inline int expr_assign(void) {
 	return 0;
 }
 
-inline int expr_or1(void) {
+inline int expr_or1(void)
+{
 	Token *start_token = current_token;
-	if (consume(OR)) {
-		if (expr_and()) {
+	if (consume(OR))
+	{
+		if (expr_and())
+		{
 			if (expr_or1()) return 1;
 			else tkerr(current_token, "Incomplete <<or>> expression.");
 		}
@@ -466,19 +523,24 @@ inline int expr_or1(void) {
 	return 1;
 }
 
-inline int expr_or(void) {
+inline int expr_or(void)
+{
 	Token *start_token = current_token;
-	if (expr_and()) {
+	if (expr_and())
+	{
 		if (expr_or1()) return 1;
 		else tkerr(current_token, "Incomplete <<or>> expression.");
 	}
 	return 0;
 }
 
-inline int expr_and1(void) {
+inline int expr_and1(void)
+{
 	Token *start_token = current_token;
-	if (consume(AND)) {
-		if (expr_eq()) {
+	if (consume(AND))
+	{
+		if (expr_eq())
+		{
 			if (expr_and1()) return 1;
 			else tkerr(current_token, "Incomplete <<and>> expession.");
 		}
@@ -488,25 +550,32 @@ inline int expr_and1(void) {
 	return 1;
 }
 
-inline int expr_and(void) {
-	if (expr_eq()) {
+inline int expr_and(void)
+{
+	if (expr_eq())
+	{
 		if (expr_and1()) return 1;
 		else tkerr(current_token, "Incomplete <<and>> expression.");
 	}
 	return 0;
 }
 
-inline int expr_eq1(void) {
+inline int expr_eq1(void)
+{
 	Token *start_token = current_token;
-	if (consume(EQUAL)) {
-		if (expr_rel()) {
+	if (consume(EQUAL))
+	{
+		if (expr_rel())
+		{
 			if (expr_eq1()) return 1;
 			else tkerr(current_token, "Missing <<expression>> in <<expression>>");
 		}
 		else tkerr(current_token, "Missing <<rel>> expression.");
 	}
-	if (consume(NOTEQ)) {
-		if (expr_rel()) {
+	if (consume(NOTEQ))
+	{
+		if (expr_rel())
+		{
 			if (expr_eq1()) return 1;
 			else tkerr(current_token, "Missing <<expression>> in <<expression>>");
 			return 1;
@@ -517,15 +586,18 @@ inline int expr_eq1(void) {
 	return 1;
 }
 
-inline int expr_eq(void) {
-	if (expr_rel()) {
+inline int expr_eq(void)
+{
+	if (expr_rel())
+	{
 		if (expr_eq1()) return 1;
 		else tkerr(current_token, "Incomplete <<equal>> expression.");
 	}
 	return 0;
 }
 
-inline int expr_rel_2(void) {
+inline int expr_rel_2(void)
+{
 	if (consume(LESS)) return 1;
 	if (consume(LESSEQ)) return 1;
 	if (consume(GREATER)) return 1;
@@ -533,10 +605,13 @@ inline int expr_rel_2(void) {
 	return 0;
 }
 
-inline int expr_rel1(void) {
+inline int expr_rel1(void)
+{
 	Token *start_token = current_token;
-	if (expr_rel_2()) {
-		if (expr_add()) {
+	if (expr_rel_2())
+	{
+		if (expr_add())
+		{
 			if (expr_rel1()) return 1;
 			else tkerr(current_token, "Missing <<rel>> expression");
 		}
@@ -546,23 +621,29 @@ inline int expr_rel1(void) {
 	return 1;
 }
 
-inline int expr_rel(void) {
+inline int expr_rel(void)
+{
 	if (!expr_add()) return 0;
 	if (!expr_rel1()) tkerr(current_token, "Incomplete <<rel>> expression.");
 	return 1;
 }
 
-inline int expr_add1(void) {
+inline int expr_add1(void)
+{
 	Token *start_token = current_token;
-	if (consume(ADD)) {
-		if (expr_add()) {
+	if (consume(ADD))
+	{
+		if (expr_add())
+		{
 			if (expr_add1()) return 1;
 			else tkerr(current_token, "Missing <<expression>> in <<add>> expression.");
 		}
 		else tkerr(current_token, "Missing <<rel>> expression.");
 	}
-	if (consume(SUB)) {
-		if (expr_add()) {
+	if (consume(SUB))
+	{
+		if (expr_add())
+		{
 			if (expr_add1()) return 1;
 			else tkerr(current_token, "Missing <<expression>> after <<sub>>.");
 		}
@@ -572,7 +653,8 @@ inline int expr_add1(void) {
 	return 1;
 }
 
-inline int expr_add(void) {
+inline int expr_add(void)
+{
 	if (expr_mul()) {
 		if (expr_add1()) return 1;
 		else tkerr(current_token, "Incomplete <<add>> expression.");
@@ -580,17 +662,22 @@ inline int expr_add(void) {
 	return 0;
 }
 
-inline int expr_mul1(void) {
+inline int expr_mul1(void)
+{
 	Token *start_token = current_token;
-	if (consume(MUL)) {
-		if (expr_cast()) {
+	if (consume(MUL))
+	{
+		if (expr_cast())
+		{
 			if (expr_mul1()) return 1;
 			else tkerr(current_token, "Missing <<mul>> after <<cast>>.");
 		}
 		else tkerr(current_token, "Missing <<rel>> expression.");
 	}
-	if (consume(DIV)) {
-		if (expr_cast()) {
+	if (consume(DIV))
+	{
+		if (expr_cast())
+		{
 			if (expr_mul1()) return 1;
 			else tkerr(current_token, "Missing <<mul>> after cast.");
 		}
@@ -600,24 +687,31 @@ inline int expr_mul1(void) {
 	return 1;
 }
 
-inline int expr_mul(void) {
+inline int expr_mul(void)
+{
 	Token *start_token = current_token;
-	if (expr_cast()) {
+	if (expr_cast())
+	{
 		if (expr_mul1()) return 1;
 		else tkerr(current_token, "Incomplete <<mul>> expression.");
 	}
 	return 0;
 }
 
-inline int expr_cast(void) {
+inline int expr_cast(void)
+{
 	Token *start_token = current_token;
 	// ST
 	Type *type = (Type*)malloc(sizeof(Type));
 	// EST
-	if (consume(LPAR)) {
-		if (type_name(type)) {
-			if (consume(RPAR)) {
-				if (expr_cast()) {
+	if (consume(LPAR))
+	{
+		if (type_name(type))
+		{
+			if (consume(RPAR))
+			{
+				if (expr_cast())
+				{
 					return 1;
 				}
 				else tkerr(current_token, "Incomplete <<cast>> declaration.");
@@ -633,30 +727,37 @@ inline int expr_cast(void) {
 	return 0;
 }
 
-inline int expr_unary(void) {
+inline int expr_unary(void)
+{
 	Token *start_token = current_token;
-	if (consume(SUB)) {
+	if (consume(SUB))
+	{
 		if (expr_unary())
 			return 1;
 		else tkerr(current_token, "Missing <<unary>> expression.");
 	}
-	if (consume(NOT)) {
+	if (consume(NOT))
+	{
 		if (expr_unary())
 			return 1;
 		else tkerr(current_token, "Missing <<unary>> expression.");
 	}
 	current_token = start_token;
-	if (expr_postfix()) {
+	if (expr_postfix())
+	{
 		return 1;
 	}
 	current_token = start_token;
 	return 0;
 }
 
-inline int expr_postfix1(void) {
+inline int expr_postfix1(void)
+{
 	Token *start_token = current_token;
-	if (consume(LBRACKET)) {
-		if (expr()) {
+	if (consume(LBRACKET))
+	{
+		if (expr())
+		{
 			if (consume(RBRACKET)) {
 				if (expr_postfix1()) return 1;
 				else tkerr(current_token, "Incomplete <<expression>> declaration.");
@@ -665,8 +766,10 @@ inline int expr_postfix1(void) {
 		}
 		else tkerr(current_token, "Missing <<expression>> after <<[>>.");
 	}
-	if (consume(DOT)) {
-		if (consume(ID)) {
+	if (consume(DOT))
+	{
+		if (consume(ID))
+		{
 			if (expr_postfix1()) return 1;
 			else tkerr(current_token, "Incomplete <<expression>>.");
 		}
@@ -676,9 +779,11 @@ inline int expr_postfix1(void) {
 	return 1;
 }
 
-inline int expr_postfix(void) {
+inline int expr_postfix(void)
+{
 	Token *start_token = current_token;
-	if (expr_primary()) {
+	if (expr_primary())
+	{
 		if (expr_postfix1()) return 1;
 		else tkerr(current_token, "Incomplete <<postfix>> declaration.");
 	}
@@ -686,20 +791,27 @@ inline int expr_postfix(void) {
 	return 0;
 }
 
-inline int expr_primary(void) {
+inline int expr_primary(void)
+{
 	Token *start_token = current_token;
-	if (consume(ID)) {
-		if (consume(LPAR)) {
-			if (expr()) {
-				while (1) {
-					if (consume(COMMA)) {
+	if (consume(ID))
+	{
+		if (consume(LPAR))
+		{
+			if (expr())
+			{
+				while (1)
+				{
+					if (consume(COMMA))
+					{
 						if (expr()) continue;
 						else tkerr(current_token, "Missing <<expression>> after <<,>>.");
 					}
 					break;
 				}
 			}
-			if (consume(RPAR)) {
+			if (consume(RPAR))
+			{
 				return 1;
 			}
 			else tkerr(current_token, "Missing <<)>> in <<primary expression>>.");
@@ -710,8 +822,10 @@ inline int expr_primary(void) {
 	if (consume(CT_REAL)) return 1;
 	if (consume(CT_CHAR)) return 1;
 	if (consume(CT_STRING)) return 1;
-	if (consume(LPAR)) {
-		if (expr()) {
+	if (consume(LPAR))
+	{
+		if (expr())
+		{
 			if (consume(RPAR))return 1;
 			else tkerr(current_token, "Missing <<)>> in <<primary expression>>.");
 		}
