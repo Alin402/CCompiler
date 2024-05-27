@@ -6,7 +6,7 @@ int sum()
 	for(i=0;i<5;i=i+1){
 		v[i]=i;
 		s=s+v[i];
-		}
+	}
 	return s;
 }
 

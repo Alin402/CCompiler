@@ -12,7 +12,7 @@
 
 int main(void)
 {
-    run_lexical_analyzer("Tests/1.c");
+    run_lexical_analyzer("Tests/8.c");
     initialize_semantic_analyzer();
     run_syntactic_analyzer();
     return 0;
